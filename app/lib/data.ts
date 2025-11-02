@@ -41,3 +41,15 @@ export async function fetchCollectedOrder() {
     throw new Error('Failed to fetch collected order data');
   }
 }
+
+export async function fetchPendingOrder() {
+  try {
+    const data = await prisma.order.count({
+      where: {status: 0},
+    });
+    return data;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch collected order data');
+  }
+}
