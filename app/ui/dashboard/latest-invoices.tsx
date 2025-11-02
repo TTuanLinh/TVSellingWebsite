@@ -52,7 +52,7 @@ export default async function Order({
                 <p
                   className={`${lusitana.className} truncate text-sm font-medium md:text-base`}
                 >
-                  {order.total}
+                  {order.total + "đ"}
                 </p>
               </div>
             );
