@@ -1,0 +1,214 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+model Revenue {
+  month     String   @unique // <-- THÊM @unique VÀO ĐÂY
+  revenue   Int
+
+  @@map("Revenues") // (Tên bảng trong CSDL, nếu cần)
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  password  String
+  name      String
+  role      Int       @default(0)
+  avatar    String?
+  phone     String?   @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime? // Hỗ trợ Xóa Mềm
+
+  // Quan hệ
+  feedbacks Feedback[]
+  orders    Order[]
+
+  @@map("Users")
+}
+
+model Brand {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  image     String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime? // Hỗ trợ Xóa Mềm
+
+  // Quan hệ
+  products Product[]
+
+  @@map("Brands")
+}
+
+model Category {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  image     String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime? // Hỗ trợ Xóa Mềm
+
+  // Quan hệ
+  products Product[]
+
+  @@map("Categories")
+}
+
+model Product {
+  id            Int       @id @default(autoincrement())
+  name          String
+  price         Int       @default(0)
+  oldPrice      Int?
+  image         String?
+  description   String?
+  specification String?
+  buyTurn       Int       @default(0)
+  quantity      Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime? // Hỗ trợ Xóa Mềm
+
+  // Quan hệ: "belongsTo"
+  brandId    Int
+  brand      Brand    @relation(fields: [brandId], references: [id])
+  categoryId Int
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  // Quan hệ: "hasMany"
+  feedbacks     Feedback[]
+  orderDetails  OrderDetail[]
+  newsDetails   NewsDetail[]
+  bannerDetails BannerDetail[]
+
+  @@map("Products")
+}
+
+model Order {
+  id        Int       @id @default(autoincrement())
+  status    Int       @default(0)
+  note      String?
+  total     Int       @default(0) // Đã đổi về Int (hoặc Decimal nếu bạn muốn)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime? // Hỗ trợ Xóa Mềm
+
+  // Quan hệ (Logic: Xóa User -> Giữ lại Order)
+  userId    Int?
+  user      User?     @relation(fields: [userId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  // Quan hệ: "hasMany"
+  orderDetails OrderDetail[]
+
+  @@map("Orders")
+}
+
+model OrderDetail {
+  id        Int       @id @default(autoincrement())
+  price     Int
+  quantity  Int       @default(1)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime? // Hỗt trợ Xóa Mềm
+
+  // Quan hệ (Logic: Xóa Order -> Xóa Detail)
+  orderId   Int
+  order     Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  // Quan hệ (Logic: Xóa Product (cứng) -> Giữ lại lịch sử)
+  productId Int?
+  product   Product?  @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@map("OrderDetails")
+}
+
+model Feedback {
+  id        Int       @id @default(autoincrement())
+  star      Int       @default(5)
+  content   String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime? // Hỗ trợ Xóa Mềm
+
+  // Quan hệ (Logic: Xóa User/Product -> Xóa Feedback)
+  userId    Int
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId Int
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("Feedbacks")
+}
+
+model News {
+  id        Int       @id @default(autoincrement())
+  title     String
+  image     String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime? // Hỗ trợ Xóa Mềm
+
+  // Quan hệ
+  newsDetails NewsDetail[]
+
+  @@map("News")
+}
+
+model NewsDetail {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime? // Hỗ trợ Xóa Mềm
+
+  // Quan hệ (Bảng liên kết)
+  newsId    Int
+  news      News      @relation(fields: [newsId], references: [id], onDelete: Cascade)
+  productId Int
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([newsId, productId], name: "unique_news_product")
+  @@map("NewsDetails")
+}
+
+model Banner {
+  id        Int       @id @default(autoincrement())
+  name      String
+  image     String?
+  status    Int       @default(0)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime? // Hỗ trợ Xóa Mềm
+
+  // Quan hệ
+  bannerDetails BannerDetail[]
+
+  @@map("Banners")
+}
+
+model BannerDetail {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime? // Hỗ trợ Xóa Mềm
+
+  // Quan hệ (Bảng liên kết)
+  bannerId  Int
+  banner    Banner    @relation(fields: [bannerId], references: [id], onDelete: Cascade)
+  productId Int
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([bannerId, productId], name: "unique_banner_product")
+  @@map("BannerDetails")
+}
