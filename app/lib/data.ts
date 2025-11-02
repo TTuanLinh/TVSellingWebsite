@@ -63,3 +63,15 @@ export async function fetchTotalOrder() {
     throw new Error('Failed to fetch total order data');
   }
 }
+
+export async function fetchTotalCustomers() {
+  try {
+    const data = await prisma.user.count({
+      where: {role: 0},
+    });
+    return data;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch total customers data');
+  }
+}

@@ -7,6 +7,7 @@ import { fetchLastestOrder } from '../lib/data';
 import { fetchCollectedOrder } from '../lib/data';
 import { fetchPendingOrder } from '../lib/data';
 import { fetchTotalOrder } from '../lib/data'; 
+import { fetchTotalCustomers } from '../lib/data';
  
 export default async function Page() {
   const revenue = await fetchRevenue();
@@ -14,6 +15,7 @@ export default async function Page() {
   const collectedOrder = await fetchCollectedOrder();
   const pendingOrder = await fetchPendingOrder();
   const totalOrder = await fetchTotalOrder();
+  const totalCustomers = await fetchTotalCustomers();
   return (
     <main>
       <h1 className={`${lusitana.className} mb-4 text-xl md:text-2xl`}>
@@ -23,11 +25,7 @@ export default async function Page() {
         <Card title="Collected" value={collectedOrder + "đ"} type="collected" />
         <Card title="Pending" value={pendingOrder} type="pending" />
         <Card title="Total Orders" value={totalOrder} type="invoices" />
-        {/* <Card
-          title="Total Customers"
-          value={numberOfCustomers}
-          type="customers"
-        /> */}
+        <Card title="Total Customers" value={totalCustomers} type="customers"/>
       </div>
       <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-4 lg:grid-cols-8">
         <RevenueChart revenue={revenue}  />
