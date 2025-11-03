@@ -117,3 +117,31 @@ export async function fetchFilteredOrders(query: string, currentPage: number) {
     throw new Error('Failed to fetch invoices.');
   }
 }
+
+export async function fetchOrdersPages(query: string) {
+  try {
+    const data = await prisma.order.count({
+      where: {
+        OR: [
+          { user: { name: { contains: query } } },
+          { user: { email: { contains: query } } },
+          {
+            total: {
+              equals: isNaN(Number(query)) ? undefined : Number(query),
+            },
+          },
+          {
+            createdAt: {
+              equals: new Date(query).toString() === 'Invalid Date' ? undefined : new Date(query),
+            },
+          },
+        ],
+      },
+    });
+    const totalPages = Math.ceil(data / ITEMS_PER_PAGE);
+    return totalPages;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch invoices.');
+  }
+}
