@@ -2,12 +2,12 @@ import { Card } from '@/app/ui/dashboard/cards';
 import RevenueChart from '@/app/ui/dashboard/revenue-chart';
 import LatestOrder from '@/app/ui/dashboard/latest-invoices';
 import { lusitana } from '@/app/ui/fonts';
-import { fetchRevenue } from '../lib/data';
-import { fetchLastestOrder } from '../lib/data';
-import { fetchCollectedOrder } from '../lib/data';
-import { fetchPendingOrder } from '../lib/data';
-import { fetchTotalOrder } from '../lib/data'; 
-import { fetchTotalCustomers } from '../lib/data';
+import { fetchRevenue } from '../../lib/data';
+import { fetchLastestOrder } from '../../lib/data';
+import { fetchCollectedOrder } from '../../lib/data';
+import { fetchPendingOrder } from '../../lib/data';
+import { fetchTotalOrder } from '../../lib/data'; 
+import { fetchTotalCustomers } from '../../lib/data';
  
 export default async function Page() {
   const revenue = await fetchRevenue();

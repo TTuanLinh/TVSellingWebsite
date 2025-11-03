@@ -3,6 +3,8 @@ import prisma from '@/app/lib/prisma';
 
 export async function fetchRevenue() {
   try {
+    console.log('Fetching revenue data...');
+    await new Promise((resolve) => setTimeout(resolve, 3000));
     const data = await prisma.revenue.findMany();
     return data;
   } catch (error) {
@@ -73,5 +75,45 @@ export async function fetchTotalCustomers() {
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch total customers data');
+  }
+}
+
+const ITEMS_PER_PAGE = 6;
+
+export async function fetchFilteredOrders(query: string, currentPage: number) {
+  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+
+  try {
+    const orders = await prisma.order.findMany({
+      where: {
+        OR: [
+          { user: { name: { contains: query } } },
+          { user: { email: { contains: query } } },
+          {
+            total: {
+              equals: isNaN(Number(query)) ? undefined : Number(query),
+            },
+          },
+          {
+            createdAt: {
+              equals: new Date(query).toString() === 'Invalid Date' ? undefined : new Date(query),
+            },
+          },
+        ],
+      },
+      include: {
+        user: true, // giống như JOIN customers
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: ITEMS_PER_PAGE,
+      skip: offset,
+    });
+
+    return orders;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch invoices.');
   }
 }

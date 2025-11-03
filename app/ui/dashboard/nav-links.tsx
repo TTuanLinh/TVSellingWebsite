@@ -17,8 +17,8 @@ const links = [
     href: '/dashboard', 
     icon: HomeIcon },
   {
-    name: 'Invoices',
-    href: '/dashboard/invoices',
+    name: 'Orders',
+    href: '/dashboard/orders',
     icon: DocumentDuplicateIcon,
   },
   { 
