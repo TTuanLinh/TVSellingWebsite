@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import { UpdateInvoice, DeleteInvoice } from '@/app/ui/invoices/buttons';
 import InvoiceStatus from '@/app/ui/invoices/status';
-import { formatDateToLocal, formatCurrency } from '@/app/lib/utils';
+import { formatDateToLocal } from '@/app/lib/utils';
 import { fetchFilteredOrders } from '@/app/lib/data';
 
 export default async function OrdersTable({
@@ -17,6 +17,7 @@ export default async function OrdersTable({
     <div className="mt-6 flow-root">
       <div className="inline-block min-w-full align-middle">
         <div className="rounded-lg bg-gray-50 p-2 md:pt-0">
+          {/* Mobile view */}
           <div className="md:hidden">
             {orders?.map((order) => (
               <div
@@ -42,7 +43,7 @@ export default async function OrdersTable({
                 <div className="flex w-full items-center justify-between pt-4">
                   <div>
                     <p className="text-xl font-medium">
-                      {formatCurrency(order.total)}
+                      {order.total + '₫'}
                     </p>
                     <p>{formatDateToLocal(order.createdAt.toISOString())}</p>
                   </div>
@@ -54,6 +55,8 @@ export default async function OrdersTable({
               </div>
             ))}
           </div>
+
+          {/* Desktop View */}
           <table className="hidden min-w-full text-gray-900 md:table">
             <thead className="rounded-lg text-left text-sm font-normal">
               <tr>
@@ -99,7 +102,7 @@ export default async function OrdersTable({
                     {order.user?.email || 'Unknown user email'}
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
-                    {formatCurrency(order.total)}
+                    {order.total + '₫'}
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
                     {formatDateToLocal(order.createdAt.toISOString())}

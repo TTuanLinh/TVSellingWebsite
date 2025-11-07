@@ -78,8 +78,7 @@ export async function fetchTotalCustomers() {
   }
 }
 
-const ITEMS_PER_PAGE = 6;
-
+const ITEMS_PER_PAGE = 5;
 export async function fetchFilteredOrders(query: string, currentPage: number) {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
@@ -102,7 +101,7 @@ export async function fetchFilteredOrders(query: string, currentPage: number) {
         ],
       },
       include: {
-        user: true, // giống như JOIN customers
+        user: true,
       },
       orderBy: {
         createdAt: 'desc',
@@ -143,5 +142,42 @@ export async function fetchOrdersPages(query: string) {
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch invoices.');
+  }
+}
+
+export async function fetchCustomers() {
+  try{
+    const data = await prisma.user.findMany({
+      where: { role: 0},
+      select: {
+        name: true,
+        id: true,
+      },
+      orderBy: { name: 'asc' }
+    });
+    return data.map((customer) => ({
+      id: customer.id,
+      name: customer.name,
+    }));
+  } catch (error){
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch customers.');
+  }
+}
+
+export async function fetchOrdersById(id: string) {
+  try {
+    const data = await prisma.order.findUnique({
+      where: {
+        id: Number(id),
+      }
+    });
+    if (!data) {
+      throw new Error(`Order with ID ${id} not found`);
+    }
+    return data;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch orders.');
   }
 }
