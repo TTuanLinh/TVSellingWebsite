@@ -4,7 +4,6 @@ import { z } from 'zod';
 import prisma from './prisma';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { error } from 'console';
 
 const FormSchema = z.object({
   id: z.number(),
@@ -69,16 +68,25 @@ export async function createOrder(prevState: State, formData: FormData) {
   redirect('/dashboard/orders');
 }
 
-export async function updateOrder(id: string, formData: FormData) {
-  const { userId, total, status } = UpdateOrder.parse({
+export async function updateOrder(prevState: State, formData: FormData) {
+  const validatedFields = UpdateOrder.safeParse({
     userId: formData.get('customerId'),
     total: formData.get('total'),
     status: formData.get('status'),
   });
 
-  await prisma.order.update({
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Missing fields. Please check the form again.',
+    }
+  }
+  const { userId, total, status } = validatedFields.data;
+
+  try {
+    await prisma.order.update({
     where: {
-      id: Number(id),
+      id: Number(formData.get('id')),
     },
     data: {
       userId: userId,
@@ -87,6 +95,11 @@ export async function updateOrder(id: string, formData: FormData) {
       // updatedAt: new Date().toISOString(),
     }
   });
+  } catch (error) {
+    return {
+      message: 'Database Error: Failed to Update order.',
+    }
+  }
  
   revalidatePath('/dashboard/orders');
   redirect('/dashboard/orders');

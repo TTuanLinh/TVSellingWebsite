@@ -9,7 +9,8 @@ import {
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { Button } from '@/app/ui/button';
-import { updateOrder } from '@/app/lib/actions';
+import { updateOrder, State } from '@/app/lib/actions';
+import { useActionState } from 'react';
 
 type CustomerField = {
   id: number;
@@ -23,10 +24,12 @@ export default function EditOrderForm({
   order: Order;
   customers: CustomerField[];
 }) {
-  const updateOrderWithId = updateOrder.bind(null, order.id.toString())
+  const initialState: State = { message: null, errors: {} };
+  const [state, formAction] = useActionState(updateOrder, initialState);
   return (
-    <form action={updateOrderWithId}>
+    <form action={formAction}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
+        <input type="hidden" name="id" value={order.id} />
         {/* Customer Name */}
         <div className="mb-4">
           <label htmlFor="customer" className="mb-2 block text-sm font-medium">
@@ -38,6 +41,7 @@ export default function EditOrderForm({
               name="customerId"
               className="peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
               defaultValue={order.userId?.toString()}
+              aria-describedby="customer-error"
             >
               <option value="" disabled>
                 Select a customer
@@ -49,6 +53,14 @@ export default function EditOrderForm({
               ))}
             </select>
             <UserCircleIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500" />
+          </div>
+          <div id="customer-error" aria-live="polite" aria-atomic="true">
+            {state.errors?.userId &&
+              state.errors.userId.map((error: string) => (
+                <p className="mt-2 text-sm text-red-500" key={error}>
+                  {error}
+                </p>
+              ))}
           </div>
         </div>
 
@@ -63,12 +75,19 @@ export default function EditOrderForm({
                 id="total"
                 name="total"
                 type="number"
-                step="0.01"
                 defaultValue={order.total}
                 placeholder="Enter VNĐ amount"
                 className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
               />
               <CurrencyDollarIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+            </div>
+            <div id="order-error" aria-live="polite" aria-atomic="true">
+              {state.errors?.total &&
+                state.errors.total.map((error: string) => (
+                  <p className="mt-2 text-sm text-red-500" key={error}>
+                    {error}
+                  </p>
+                ))}
             </div>
           </div>
         </div>
@@ -88,6 +107,7 @@ export default function EditOrderForm({
                   value="0"
                   defaultChecked={order.status === 0}
                   className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 text-gray-600 focus:ring-2"
+                  aria-describedby="status-error"
                 />
                 <label
                   htmlFor="pending"
@@ -104,6 +124,7 @@ export default function EditOrderForm({
                   value="1"
                   defaultChecked={order.status === 1}
                   className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 text-gray-600 focus:ring-2"
+                  aria-describedby="status-error"
                 />
                 <label
                   htmlFor="paid"
@@ -112,6 +133,14 @@ export default function EditOrderForm({
                   Paid <CheckIcon className="h-4 w-4" />
                 </label>
               </div>
+            </div>
+            <div id="status-error" aria-live="polite" aria-atomic="true">
+              {state.errors?.status &&
+                state.errors.status.map((error: string) => (
+                  <p className="mt-2 text-sm text-red-500" key={error}>
+                    {error}
+                  </p>
+                ))}
             </div>
           </div>
         </fieldset>
