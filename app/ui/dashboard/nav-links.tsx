@@ -4,7 +4,13 @@ import {
   UserGroupIcon,
   HomeIcon,
   DocumentDuplicateIcon,
-  ShoppingBagIcon
+  ShoppingBagIcon,
+  ArchiveBoxIcon, // Cho Products
+  RectangleGroupIcon, // Cho Categories/Brands
+  NewspaperIcon, // Cho News/Banners
+  InboxStackIcon, // Cho "My Orders"
+  ShoppingCartIcon, // Cho "My Cart"
+  Cog6ToothIcon, // Cho "My Profile"
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -34,25 +40,39 @@ const links = [
   { 
     name: 'Products', 
     href: '/dashboard/products', 
-    icon: UserGroupIcon,
+    icon: ArchiveBoxIcon,
     adminOnly: true,
   },
   { 
+    name: 'Profile', 
+    href: '/dashboard/profile', 
+    icon: Cog6ToothIcon,
+    adminOnly: true,
+  },
+
+
+  { 
     name: 'Home', 
     href: '/userDashboard',
-    icon: ShoppingBagIcon,
+    icon: HomeIcon,
     adminOnly: false
   },
   { 
     name: 'My Cart', 
     href: '/userDashboard/cart', 
-    icon: ShoppingBagIcon, 
+    icon: ShoppingCartIcon, 
     adminOnly: false
   },
   { 
-    name: 'Checkout', 
-    href: '/userDashboard/checkout', 
-    icon: ShoppingBagIcon, 
+    name: 'My Orders', 
+    href: '/userDashboard/orders', 
+    icon: InboxStackIcon, 
+    adminOnly: false
+  },
+  { 
+    name: 'My Profile',
+    href: '/userDashboard/profile', 
+    icon: Cog6ToothIcon, 
     adminOnly: false
   },
 ];
