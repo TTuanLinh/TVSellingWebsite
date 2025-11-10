@@ -4,6 +4,7 @@ import {
   UserGroupIcon,
   HomeIcon,
   DocumentDuplicateIcon,
+  ShoppingBagIcon
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -15,29 +16,62 @@ const links = [
   { 
     name: 'Home', 
     href: '/dashboard', 
-    icon: HomeIcon },
+    icon: HomeIcon,
+    adminOnly: true,
+  },
   {
     name: 'Orders',
     href: '/dashboard/orders',
     icon: DocumentDuplicateIcon,
+    adminOnly: true,
   },
   { 
     name: 'Customers', 
     href: '/dashboard/customers', 
-    icon: UserGroupIcon 
+    icon: UserGroupIcon,
+    adminOnly: true,
   },
   { 
     name: 'Products', 
     href: '/dashboard/products', 
-    icon: UserGroupIcon 
+    icon: UserGroupIcon,
+    adminOnly: true,
+  },
+  { 
+    name: 'Home', 
+    href: '/userDashboard',
+    icon: ShoppingBagIcon,
+    adminOnly: false
+  },
+  { 
+    name: 'My Cart', 
+    href: '/userDashboard/cart', 
+    icon: ShoppingBagIcon, 
+    adminOnly: false
+  },
+  { 
+    name: 'Checkout', 
+    href: '/userDashboard/checkout', 
+    icon: ShoppingBagIcon, 
+    adminOnly: false
   },
 ];
 
-export default function NavLinks() {
+export default function NavLinks({userRole}: {userRole: number | null | undefined}) {
   const pathname = usePathname();
+
+  const accessibleLinks = links.filter((link) => {
+    // Nếu là Admin (role 1) -> hiển thị tất cả link
+    if (userRole === 1) return link.adminOnly === true;
+    // Nếu là User (role 0) -> chỉ hiển thị link Home
+    else{
+      return link.adminOnly === false;
+    }
+  });
+
   return (
     <>
-      {links.map((link) => {
+      {accessibleLinks.map((link) => {
         const LinkIcon = link.icon;
         return (
           <Link
