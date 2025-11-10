@@ -76,6 +76,7 @@ model Product {
   image         String?
   description   String?
   specification String?
+  size          Int?
   buyTurn       Int       @default(0)
   quantity      Int       @default(0)
   createdAt     DateTime  @default(now())

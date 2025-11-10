@@ -44,6 +44,18 @@ const links = [
     adminOnly: true,
   },
   { 
+    name: 'Brands', 
+    href: '/dashboard/brands', 
+    icon: ArchiveBoxIcon,
+    adminOnly: true,
+  },
+  { 
+    name: 'Categories', 
+    href: '/dashboard/categories', 
+    icon: ArchiveBoxIcon,
+    adminOnly: true,
+  },
+  { 
     name: 'Profile', 
     href: '/dashboard/profile', 
     icon: Cog6ToothIcon,
