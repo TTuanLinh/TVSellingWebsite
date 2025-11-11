@@ -6,6 +6,15 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { signIn } from '@/auth';
 import { AuthError } from 'next-auth';
+import bcrypt from 'bcrypt';
+
+const registerSchema = z.object({
+  email: z.string().email({ 
+    message: 'Please enter a valid email address.' 
+  }),
+  password: z.string(),
+  repassword: z.string()
+});
 
 const FormSchema = z.object({
   id: z.number(),
@@ -168,6 +177,56 @@ export async function authenticate(
     }
     throw error;
   }
+}
+
+export async function register(
+  prevState: string | undefined, // <-- 'prevState' (sẽ là 'errorMessage' trong Form)
+  formData: FormData,
+) {
+  // 3. Lấy dữ liệu từ Form
+  const rawFormData = Object.fromEntries(formData.entries());
+  const validatedFields = registerSchema.safeParse(rawFormData);
+
+  if (!validatedFields.success) {
+    return 'Invalid data. Please check your fields.'; // Trả về 'string' lỗi
+  }
+
+  const { email, password, repassword } = validatedFields.data;
+
+  // 4. Kiểm tra mật khẩu khớp
+  if (password !== repassword) {
+    return 'Passwords do not match.'; // Trả về 'string' lỗi
+  }
+
+  try {
+    // 5. Kiểm tra email tồn tại
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+      select: { id: true },
+    });
+
+    if (existingUser) {
+      return 'An account with this email already exists.'; // Trả về 'string' lỗi
+    }
+
+    // 6. Băm mật khẩu (Rất quan trọng)
+    const hashedPassword = await bcrypt.hash(password, 10); 
+
+    // 7. Tạo người dùng mới (Mặc định role = 0)
+    await prisma.user.create({
+      data: {
+        email: email,
+        password: hashedPassword,
+        name: email.split('@')[0], 
+      },
+    });
+  } catch (error) {
+    console.error('Database Error:', error);
+    return 'Failed to create account. Please try again.'; // Trả về 'string' lỗi
+  }
+  
+  // 8. Đăng ký thành công -> Chuyển hướng đến trang Đăng nhập
+  redirect('/login');
 }
 
 export async function deleteCategory(id: string) {
