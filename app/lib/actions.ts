@@ -22,14 +22,32 @@ const FormSchema = z.object({
   updatedAt: z.string(),
 });
 
+const CategoryFormSchema = z.object({
+  id: z.number(),
+  name: z.string().min(1, {
+    message: 'Category name is required.',
+  }),
+});
+
+
 const UpdateOrder = FormSchema.omit({ id: true, createdAt: true, updatedAt: true });
 const CreateOrder = FormSchema.omit({ id: true, createdAt: true, updatedAt: true });
+
+const UpdateCategory = CategoryFormSchema.omit({ id: true });
+const CreateCategory = CategoryFormSchema.omit({ id: true });
 
 export type State = {
   errors?: {
     userId?: string[];
     total?: string[];
     status?: string[];
+  };
+  message: string | null;
+};
+
+export type CategoryState = {
+  errors?: {
+    name?: string[];
   };
   message: string | null;
 };
@@ -133,4 +151,77 @@ export async function authenticate(
     }
     throw error;
   }
+}
+
+export async function deleteCategory(id: string) {
+  await prisma.category.delete({
+    where: {
+      id: Number(id),
+    },
+  });
+  revalidatePath('/dashboard/categories');
+}
+
+export async function createCategory(prevState: CategoryState, formData: FormData) {
+  const validatedFields = CreateCategory.safeParse({
+    name: formData.get('name'),
+  });
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Missing fields. Please check the form again.',
+    }
+  }
+
+  const { name } = validatedFields.data;
+  
+  try {
+    await prisma.category.create({
+      data: {
+        name: name,
+        // createdAt: new Date().toISOString(),
+      }
+    });
+  } catch (error) {
+    return {
+      message: 'Database Error: Failed to Create Category.',
+    }
+  }
+  
+  revalidatePath('/dashboard/categories');
+  redirect('/dashboard/categories');
+}
+
+export async function updateCategory(prevState: CategoryState, formData: FormData) {
+  const validatedFields = UpdateCategory.safeParse({
+    name: formData.get('name'),
+  });
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Missing fields. Please check the form again.',
+    }
+  }
+  const { name } = validatedFields.data;
+
+  try {
+    await prisma.category.update({
+    where: {
+      id: Number(formData.get('id')),
+    },
+    data: {
+      name: name,
+      // updatedAt: new Date().toISOString(),
+    }
+  });
+  } catch (error) {
+    return {
+      message: 'Database Error: Failed to Update order.',
+    }
+  }
+ 
+  revalidatePath('/dashboard/categories');
+  redirect('/dashboard/categories');
 }

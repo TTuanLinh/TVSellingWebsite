@@ -181,3 +181,71 @@ export async function fetchOrdersById(id: string) {
     throw new Error('Failed to fetch orders.');
   }
 }
+
+export async function fetchFilteredCategories(query: string, currentPage: number) {
+  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+
+  try {
+    const categories = await prisma.category.findMany({
+      where: {
+        OR: [
+          { name: { contains: query } },
+          {
+            createdAt: {
+              equals: new Date(query).toString() === 'Invalid Date' ? undefined : new Date(query),
+            },
+          },
+        ],
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: ITEMS_PER_PAGE,
+      skip: offset,
+    });
+
+    return categories;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch invoices.');
+  }
+}
+
+export async function fetchCategoriesPages(query: string) {
+  try {
+    const data = await prisma.category.count({
+      where: {
+        OR: [
+          { name: { contains: query } },
+          {
+            createdAt: {
+              equals: new Date(query).toString() === 'Invalid Date' ? undefined : new Date(query),
+            },
+          },
+        ],
+      },
+    });
+    const totalPages = Math.ceil(data / ITEMS_PER_PAGE);
+    return totalPages;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch categories.');
+  }
+}
+
+export async function fetchCategoriesById(id: string) {
+  try {
+    const data = await prisma.category.findUnique({
+      where: {
+        id: Number(id),
+      }
+    });
+    if (!data) {
+      throw new Error(`Category with ID ${id} not found`);
+    }
+    return data;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch categories.');
+  }
+}
