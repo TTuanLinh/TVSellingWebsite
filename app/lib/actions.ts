@@ -29,12 +29,22 @@ const CategoryFormSchema = z.object({
   }),
 });
 
+const BrandFormSchema = z.object({
+  id: z.number(),
+  name: z.string().min(1, {
+    message: 'Brand name is required.',
+  }),
+});
+
 
 const UpdateOrder = FormSchema.omit({ id: true, createdAt: true, updatedAt: true });
 const CreateOrder = FormSchema.omit({ id: true, createdAt: true, updatedAt: true });
 
 const UpdateCategory = CategoryFormSchema.omit({ id: true });
 const CreateCategory = CategoryFormSchema.omit({ id: true });
+
+const UpdateBrand = BrandFormSchema.omit({ id: true });
+const CreateBrand = BrandFormSchema.omit({ id: true });
 
 export type State = {
   errors?: {
@@ -46,6 +56,13 @@ export type State = {
 };
 
 export type CategoryState = {
+  errors?: {
+    name?: string[];
+  };
+  message: string | null;
+};
+
+export type BrandState = {
   errors?: {
     name?: string[];
   };
@@ -224,4 +241,81 @@ export async function updateCategory(prevState: CategoryState, formData: FormDat
  
   revalidatePath('/dashboard/categories');
   redirect('/dashboard/categories');
+}
+
+export async function deleteBrand(id: string) {
+  await prisma.brand.delete({
+    where: {
+      id: Number(id),
+    },
+  });
+  revalidatePath('/dashboard/brands');
+}
+
+
+// Create, Update Brands
+export async function createBrand(prevState: BrandState, formData: FormData) {
+  const validatedFields = CreateBrand.safeParse({
+    name: formData.get('name'),
+  });
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Missing fields. Please check the form again.',
+    }
+  }
+
+  const { name } = validatedFields.data;
+  
+  try {
+    await prisma.brand.create({
+      data: {
+        name: name,
+        // createdAt: new Date().toISOString(),
+      }
+    });
+  } catch (error) {
+    return {
+      message: 'Database Error: Failed to Create Brand.',
+    }
+  }
+  
+  revalidatePath('/dashboard/brands');
+  redirect('/dashboard/brands');
+}
+
+export async function updateBrand(prevState: BrandState, formData: FormData) {
+  const validatedFields = UpdateBrand.safeParse({
+    name: formData.get('name'),
+  });
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Missing fields. Please check the form again.',
+    }
+  }
+  const { name } = validatedFields.data;
+  const id = formData.get('id');
+
+  try {
+    await prisma.brand.update({
+    where: {
+      id: Number(id),
+    },
+    data: {
+      name: name,
+      // updatedAt: new Date().toISOString(),
+    }
+  });
+  } catch (error) {
+    return {
+      message: 'Database Error: Failed to Update brand.',
+    }
+  }
+ 
+  revalidatePath('/dashboard/brands');
+  revalidatePath(`/dashboard/brands/${id}/edit`);
+  redirect('/dashboard/brands');
 }
