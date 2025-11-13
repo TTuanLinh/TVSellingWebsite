@@ -200,7 +200,7 @@ export async function register(
 
   try {
     // 5. Kiểm tra email tồn tại
-    const existingUser = await prisma.user.findUnique({
+    const existingUser = await prisma.user.findFirst({
       where: { email },
       select: { id: true },
     });
