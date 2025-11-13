@@ -1,11 +1,10 @@
 import Form from '@/app/ui/categories/edit-form';
 import Breadcrumbs from '@/app/ui/invoices/breadcrumbs';
 import { fetchCategoriesById } from '@/app/lib/data';
+import { Suspense } from 'react';
  
-export default async function Page(props: { params: Promise<{ id: string }> }) {
-  const params = await props.params;
-  const id = params.id;
-  const category = await fetchCategoriesById(id);
+export default async function Page(props: { params: { id: string } }) {
+  const id = props.params.id;
 
   return (
     <main>
@@ -19,7 +18,18 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
           },
         ]}
       />
-      <Form category={category} />
+      <Suspense fallback={<div>Loading...</div>}>
+        <EditFormLoader id={id} />
+      </Suspense>
     </main>
   );
+}
+
+async function EditFormLoader({ id }: { id: string }) {
+  // Dữ liệu động được fetch ở đây
+  const category = await fetchCategoriesById(id);
+
+  // (Nên thêm: if (!brand) { notFound(); } )
+
+  return <Form category={category} />
 }
