@@ -8,7 +8,7 @@ import { Suspense } from 'react';
 import { fetchBrandsPages } from '@/app/lib/data';
 
 /**
- * 1. Sửa lại typing của searchParams (không cần Promise)
+ * 1. Sửa typing của searchParams (bỏ Promise)
  * 2. Page KHÔNG còn "async"
  */
 export default function Page({
@@ -19,7 +19,6 @@ export default function Page({
     page?: string;
   };
 }) {
-  // 3. Lấy query và page một cách đồng bộ (synchronously)
   const query = searchParams?.query || '';
   const currentPage = Number(searchParams?.page) || 1;
 
@@ -29,18 +28,20 @@ export default function Page({
         <h1 className={`${lusitana.className} text-2xl`}>Brands</h1>
       </div>
       <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
-        <Search placeholder="Search Brands..." />
+        <Suspense fallback={<div>Loading Search...</div>}>
+          <Search placeholder="Search Brands..." />
+        </Suspense>
         <CreateBrand />
       </div>
-      
-      {/* Suspense cho Table (Giữ nguyên, đã đúng) */}
+
+      {/* Suspense cho Table (Giữ nguyên) */}
       <Suspense key={query + currentPage} fallback={<InvoicesTableSkeleton />}>
         <Table query={query} currentPage={currentPage} />
       </Suspense>
-      
-      {/* 4. Thêm Suspense cho Pagination */}
+
+      {/* 3. THÊM SUSPENSE CHO PAGINATION */}
       <div className="mt-5 flex w-full justify-center">
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<div>Loading pagination...</div>}>
           <PaginationWrapper query={query} />
         </Suspense>
       </div>
@@ -49,7 +50,7 @@ export default function Page({
 }
 
 /**
- * 5. Tạo component con "async" để fetch totalPages
+ * 4. Tạo component con "async" để fetch totalPages
  */
 async function PaginationWrapper({ query }: { query: string }) {
   const totalPages = await fetchBrandsPages(query);

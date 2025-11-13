@@ -29,7 +29,9 @@ export default function Page({
         <h1 className={`${lusitana.className} text-2xl`}>Orders</h1>
       </div>
       <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
-        <Search placeholder="Search orders..." />
+        <Suspense fallback={<div>Loading Search...</div>}>
+          <Search placeholder="Search Orders..." />
+        </Suspense>
         <CreateInvoice />
       </div>
       
