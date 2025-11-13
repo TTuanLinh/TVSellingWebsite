@@ -301,7 +301,7 @@ export async function fetchBrandsPages(query: string) {
   }
 }
 
-export async function fetchBrandsById(id: number) {
+export async function fetchBrandsById(id: string) {
   try {
     const data = await prisma.brand.findUnique({
       where: {

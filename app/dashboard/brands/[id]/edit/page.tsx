@@ -3,7 +3,7 @@ import Breadcrumbs from '@/app/ui/invoices/breadcrumbs';
 import { fetchBrandsById } from '@/app/lib/data';
 import { Suspense } from 'react';
  
-export default function Page(props: { params: { id: number } }) {
+export default function Page(props: { params: { id: string } }) {
   const id = props.params.id;
 
   return (
@@ -25,7 +25,7 @@ export default function Page(props: { params: { id: number } }) {
   );
 }
 
-async function EditFormLoader({ id }: { id: number }) {
+async function EditFormLoader({ id }: { id: string }) {
   // Dữ liệu động được fetch ở đây
   const brand = await fetchBrandsById(id);
   return <Form brand={brand} />;
