@@ -3,7 +3,7 @@ import Breadcrumbs from '@/app/ui/invoices/breadcrumbs';
 import { fetchBrandsById } from '@/app/lib/data';
 import { Suspense } from 'react';
  
-export default async function Page(props: { params: { id: string } }) {
+export default function Page(props: { params: { id: string } }) {
   const id = props.params.id;
 
   return (
