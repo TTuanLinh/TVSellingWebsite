@@ -166,10 +166,14 @@ export async function fetchCustomers() {
 }
 
 export async function fetchOrdersById(id: string) {
+  const numericId = Number(id);
+  if (isNaN(numericId)) {
+    return null;
+  }
   try {
     const data = await prisma.order.findUnique({
       where: {
-        id: Number(id),
+        id: numericId,
       }
     });
     if (!data) {
@@ -234,10 +238,14 @@ export async function fetchCategoriesPages(query: string) {
 }
 
 export async function fetchCategoriesById(id: string) {
+  const numericId = Number(id);
+  if (isNaN(numericId)) {
+    return null;
+  }
   try {
     const data = await prisma.category.findUnique({
       where: {
-        id: Number(id),
+        id: numericId,
       }
     });
     if (!data) {

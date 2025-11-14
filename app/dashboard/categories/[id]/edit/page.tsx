@@ -2,6 +2,7 @@ import Form from '@/app/ui/categories/edit-form';
 import Breadcrumbs from '@/app/ui/invoices/breadcrumbs';
 import { fetchCategoriesById } from '@/app/lib/data';
 import { Suspense } from 'react';
+import { notFound } from 'next/navigation';
  
 export default function Page(props: { params: { id: string } }) {
   const id = props.params.id;
@@ -30,6 +31,8 @@ async function EditFormLoader({ id }: { id: string }) {
   const category = await fetchCategoriesById(id);
 
   // (Nên thêm: if (!brand) { notFound(); } )
-
+  if (!category) {
+    notFound();
+  }
   return <Form category={category} />
 }
