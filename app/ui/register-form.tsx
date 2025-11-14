@@ -8,7 +8,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { ArrowRightIcon } from '@heroicons/react/20/solid';
 import { Button } from './button';
-import { useActionState } from 'react';
+import { useState, useActionState } from 'react';
 import { register } from '@/app/lib/actions';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -20,6 +20,7 @@ export default function RegisterForm() {
     register,
     undefined,
   );
+  const [isTermsChecked, setIsTermsChecked] = useState(false);
   return (
     <form action={formAction} className="space-y-3">
       <div className="flex-1 rounded-lg bg-gray-50 px-6 pb-4 pt-8">
@@ -90,7 +91,32 @@ export default function RegisterForm() {
           </div>
         </div>
         <input type="hidden" name="callbackUrl" value={callbackUrl} />
-        <Button className="mt-4 w-full" aria-disabled={isPending} type="submit">
+        <div className="mt-4 flex items-center">
+          <input
+            id="terms"
+            name="terms"
+            type="checkbox"
+            // Liên kết trạng thái
+            checked={isTermsChecked}
+            // Cập nhật trạng thái khi nhấp
+            onChange={(e) => setIsTermsChecked(e.target.checked)}
+            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+          />
+          <label
+            htmlFor="terms"
+            className="ml-2 block text-sm text-gray-900"
+          >
+            I agree to the{' '}
+            <Link
+              href="/terms" // Thay đổi thành đường dẫn đến trang điều khoản
+              className="font-medium text-blue-600 hover:text-blue-500"
+              target="_blank" // Mở trong tab mới
+            >
+              Terms of Service
+            </Link>
+          </label>
+        </div>
+        <Button className="mt-4 w-full" aria-disabled={isPending || isTermsChecked} disabled={isPending || !isTermsChecked} type="submit">
           Sign up <ArrowRightIcon className="ml-auto h-5 w-5 text-gray-50" />
         </Button>
         <div className="flex h-8 items-end space-x-1" aria-live="polite" aria-atomic="true">
