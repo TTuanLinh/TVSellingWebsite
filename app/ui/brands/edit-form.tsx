@@ -17,12 +17,12 @@ export default function EditBrandForm({
 }: {
   brand: Brand;
 }) {
+  const updateBrandWithId = updateBrand.bind(null, brand.id.toString());
   const initialState: BrandState = { message: null, errors: {} };
-  const [state, formAction] = useActionState(updateBrand, initialState);
+  const [state, formAction] = useActionState(updateBrandWithId, initialState);
   return (
     <form action={formAction}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
-        <input type="hidden" name="id" value={brand.id} />
         {/* Brand Name */}
         <div className="mb-4">
           <label htmlFor="customer" className="mb-2 block text-sm font-medium">

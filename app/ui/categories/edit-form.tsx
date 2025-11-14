@@ -17,12 +17,12 @@ export default function EditCategoryForm({
 }: {
   category: Category;
 }) {
+  const updateCategoryWithID = updateCategory.bind(null, category.id.toString());
   const initialState: CategoryState = { message: null, errors: {} };
-  const [state, formAction] = useActionState(updateCategory, initialState);
+  const [state, formAction] = useActionState(updateCategoryWithID, initialState);
   return (
     <form action={formAction}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
-        <input type="hidden" name="id" value={category.id} />
         {/* Customer Name */}
         <div className="mb-4">
           <label htmlFor="customer" className="mb-2 block text-sm font-medium">

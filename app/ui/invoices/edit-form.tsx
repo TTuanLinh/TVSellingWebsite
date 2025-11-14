@@ -24,12 +24,12 @@ export default function EditOrderForm({
   order: Order;
   customers: CustomerField[];
 }) {
+  const updateOrderWithId = updateOrder.bind(null, order.id.toString());
   const initialState: State = { message: null, errors: {} };
-  const [state, formAction] = useActionState(updateOrder, initialState);
+  const [state, formAction] = useActionState(updateOrderWithId, initialState);
   return (
     <form action={formAction}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
-        <input type="hidden" name="id" value={order.id} />
         {/* Customer Name */}
         <div className="mb-4">
           <label htmlFor="customer" className="mb-2 block text-sm font-medium">
