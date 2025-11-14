@@ -1,4 +1,4 @@
-import { Revenue } from "@/generated/prisma/client";
+import { Revenue } from "@prisma/client";
 
 export const formatCurrency = (amount: number) => {
   return (amount / 100).toLocaleString('en-US', {
