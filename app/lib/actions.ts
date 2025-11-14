@@ -114,7 +114,18 @@ export async function createOrder(prevState: State, formData: FormData) {
   redirect('/dashboard/orders');
 }
 
-export async function updateOrder(prevState: State, formData: FormData) {
+export async function updateOrder(
+  id: string, // <-- SỬA: Thêm ID làm tham số
+  prevState: State,
+  formData: FormData,
+) {
+  // 1. Validate ID
+  const numericId = parseInt(id, 10);
+  if (isNaN(numericId)) {
+    return { message: 'Invalid Order ID.' };
+  }
+
+  // 2. Validate Form
   const validatedFields = UpdateOrder.safeParse({
     userId: formData.get('customerId'),
     total: formData.get('total'),
@@ -125,38 +136,50 @@ export async function updateOrder(prevState: State, formData: FormData) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
       message: 'Missing fields. Please check the form again.',
-    }
+    };
   }
   const { userId, total, status } = validatedFields.data;
 
+  // 3. Update Database
   try {
     await prisma.order.update({
-    where: {
-      id: Number(formData.get('id')),
-    },
-    data: {
-      userId: userId,
-      total: total,
-      status: status,
-      // updatedAt: new Date().toISOString(),
-    }
-  });
+      where: {
+        id: numericId, // <-- SỬA: Dùng ID đã validate
+      },
+      data: {
+        userId: userId,
+        total: total,
+        status: status,
+      },
+    });
   } catch (error) {
     return {
       message: 'Database Error: Failed to Update order.',
-    }
+    };
   }
- 
+
   revalidatePath('/dashboard/orders');
+  revalidatePath(`/dashboard/orders/${numericId}/edit`); // Thêm revalidate cho trang edit
   redirect('/dashboard/orders');
 }
 
 export async function deleteOrder(id:string) {
-  await prisma.order.delete({
-    where: {
-      id: Number(id),
-    },
-  });
+  const numericId = parseInt(id, 10);
+  if (isNaN(numericId)) {
+    console.error('Invalid ID for deletion:', id);
+    throw new Error('Invalid ID.');
+  }
+  try {
+    await prisma.order.delete({
+      where: {
+        id: numericId, 
+      },
+    });
+    revalidatePath('/dashboard/orders');
+  } catch (error) {
+    console.error('Delete Error:', error);
+    throw new Error('Database Error: Failed to delete order.');
+  }
   revalidatePath('/dashboard/orders');
 }
 
@@ -230,12 +253,25 @@ export async function register(
 }
 
 export async function deleteCategory(id: string) {
-  await prisma.category.delete({
-    where: {
-      id: Number(id),
-    },
-  });
-  revalidatePath('/dashboard/categories');
+  // 1. Validate ID
+  const numericId = parseInt(id, 10);
+  if (isNaN(numericId)) {
+    console.error('Invalid ID for deletion:', id);
+    throw new Error('Invalid ID.');
+  }
+
+  // 2. Delete Database (thêm try...catch)
+  try {
+    await prisma.category.delete({
+      where: {
+        id: numericId, // <-- SỬA: Dùng ID đã validate
+      },
+    });
+    revalidatePath('/dashboard/categories');
+  } catch (error) {
+    console.error('Delete Error:', error);
+    throw new Error('Database Error: Failed to delete category.');
+  }
 }
 
 export async function createCategory(prevState: CategoryState, formData: FormData) {
@@ -269,7 +305,18 @@ export async function createCategory(prevState: CategoryState, formData: FormDat
   redirect('/dashboard/categories');
 }
 
-export async function updateCategory(prevState: CategoryState, formData: FormData) {
+export async function updateCategory(
+  id: string, // <-- SỬA: Thêm ID làm tham số
+  prevState: CategoryState,
+  formData: FormData,
+) {
+  // 1. Validate ID
+  const numericId = parseInt(id, 10);
+  if (isNaN(numericId)) {
+    return { message: 'Invalid Category ID.' };
+  }
+
+  // 2. Validate Form
   const validatedFields = UpdateCategory.safeParse({
     name: formData.get('name'),
   });
@@ -278,37 +325,51 @@ export async function updateCategory(prevState: CategoryState, formData: FormDat
     return {
       errors: validatedFields.error.flatten().fieldErrors,
       message: 'Missing fields. Please check the form again.',
-    }
+    };
   }
   const { name } = validatedFields.data;
 
+  // 3. Update Database
   try {
     await prisma.category.update({
-    where: {
-      id: Number(formData.get('id')),
-    },
-    data: {
-      name: name,
-      // updatedAt: new Date().toISOString(),
-    }
-  });
+      where: {
+        id: numericId, // <-- SỬA: Dùng ID đã validate
+      },
+      data: {
+        name: name,
+      },
+    });
   } catch (error) {
     return {
-      message: 'Database Error: Failed to Update order.',
-    }
+      message: 'Database Error: Failed to Update category.',
+    };
   }
- 
+
   revalidatePath('/dashboard/categories');
+  revalidatePath(`/dashboard/categories/${numericId}/edit`); // Thêm revalidate cho trang edit
   redirect('/dashboard/categories');
 }
 
 export async function deleteBrand(id: string) {
-  await prisma.brand.delete({
-    where: {
-      id: Number(id),
-    },
-  });
-  revalidatePath('/dashboard/brands');
+  // 1. Validate ID
+  const numericId = parseInt(id, 10);
+  if (isNaN(numericId)) {
+    console.error('Invalid ID for deletion:', id);
+    throw new Error('Invalid ID.');
+  }
+
+  // 2. Delete Database (thêm try...catch)
+  try {
+    await prisma.brand.delete({
+      where: {
+        id: numericId, // <-- SỬA: Dùng ID đã validate
+      },
+    });
+    revalidatePath('/dashboard/brands');
+  } catch (error) {
+    console.error('Delete Error:', error);
+    throw new Error('Database Error: Failed to delete brand.');
+  }
 }
 
 
@@ -344,7 +405,18 @@ export async function createBrand(prevState: BrandState, formData: FormData) {
   redirect('/dashboard/brands');
 }
 
-export async function updateBrand(prevState: BrandState, formData: FormData) {
+export async function updateBrand(
+  id: string, // <-- SỬA: Thêm ID làm tham số
+  prevState: BrandState,
+  formData: FormData,
+) {
+  // 1. Validate ID
+  const numericId = parseInt(id, 10);
+  if (isNaN(numericId)) {
+    return { message: 'Invalid Brand ID.' };
+  }
+
+  // 2. Validate Form
   const validatedFields = UpdateBrand.safeParse({
     name: formData.get('name'),
   });
@@ -353,28 +425,27 @@ export async function updateBrand(prevState: BrandState, formData: FormData) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
       message: 'Missing fields. Please check the form again.',
-    }
+    };
   }
   const { name } = validatedFields.data;
-  const id = formData.get('id');
 
+  // 3. Update Database
   try {
     await prisma.brand.update({
-    where: {
-      id: Number(id),
-    },
-    data: {
-      name: name,
-      // updatedAt: new Date().toISOString(),
-    }
-  });
+      where: {
+        id: numericId, // <-- SỬA: Dùng ID đã validate
+      },
+      data: {
+        name: name,
+      },
+    });
   } catch (error) {
     return {
       message: 'Database Error: Failed to Update brand.',
-    }
+    };
   }
- 
+
   revalidatePath('/dashboard/brands');
-  revalidatePath(`/dashboard/brands/${id}/edit`);
+  revalidatePath(`/dashboard/brands/${numericId}/edit`);
   redirect('/dashboard/brands');
 }
