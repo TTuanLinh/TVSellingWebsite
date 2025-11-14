@@ -2,7 +2,7 @@ import NextAuth from 'next-auth';
 import { authConfig } from './auth.config'; // Import file config (ở trên)
 import Credentials from 'next-auth/providers/credentials';
 import { z } from 'zod';
-import { User as PrismaUser } from '@/generated/prisma/client';
+import { User as PrismaUser } from '@prisma/client';
 import prisma from '@/app/lib/prisma';
 import bcrypt from 'bcrypt';
 

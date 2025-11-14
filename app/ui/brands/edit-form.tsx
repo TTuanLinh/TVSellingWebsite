@@ -1,6 +1,6 @@
 'use client';
 
-import { Brand } from '@/generated/prisma/client';
+import { Brand } from '@prisma/client';
 import {
   CheckIcon,
   ClockIcon,

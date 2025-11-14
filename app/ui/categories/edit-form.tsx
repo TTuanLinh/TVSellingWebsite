@@ -1,6 +1,6 @@
 'use client';
 
-import { Category } from '@/generated/prisma/client';
+import { Category } from '@prisma/client';
 import {
   CheckIcon,
   ClockIcon,

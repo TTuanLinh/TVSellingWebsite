@@ -1,7 +1,7 @@
 import { generateYAxis } from '@/app/lib/utils';
 import { CalendarIcon } from '@heroicons/react/24/outline';
 import { lusitana } from '@/app/ui/fonts';
-import { Revenue } from '@/generated/prisma/client';
+import { Revenue } from '@prisma/client';
 
 // This component is representational only.
 // For data visualization UI, check out:

@@ -2,8 +2,8 @@ import { ArrowPathIcon } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
 import Image from 'next/image';
 import { lusitana } from '@/app/ui/fonts';
-import type { Order, User } from '@/generated/prisma/client';
-import { Prisma } from '@/generated/prisma/client';
+import type { Order, User } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
 type LatestOrderType = Prisma.OrderGetPayload<{ include: { user: true } }>;
 

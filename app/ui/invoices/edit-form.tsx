@@ -1,6 +1,6 @@
 'use client';
 
-import { Order } from '@/generated/prisma/client';
+import { Order } from '@prisma/client';
 import {
   CheckIcon,
   ClockIcon,
