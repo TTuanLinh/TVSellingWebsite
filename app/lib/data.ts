@@ -302,10 +302,14 @@ export async function fetchBrandsPages(query: string) {
 }
 
 export async function fetchBrandsById(id: string) {
+  const numericId = Number(id);
+  if (isNaN(numericId)) {
+    return null;
+  }
   try {
     const data = await prisma.brand.findUnique({
       where: {
-        id: Number(id),
+        id: numericId,
       }
     });
     if (!data) {

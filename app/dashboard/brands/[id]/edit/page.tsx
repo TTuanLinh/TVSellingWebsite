@@ -2,6 +2,7 @@ import Form from '@/app/ui/brands/edit-form';
 import Breadcrumbs from '@/app/ui/invoices/breadcrumbs';
 import { fetchBrandsById } from '@/app/lib/data';
 import { Suspense } from 'react';
+import { notFound } from 'next/navigation';
  
 export default function Page(props: { params: { id: string } }) {
   const id = props.params.id;
@@ -28,5 +29,8 @@ export default function Page(props: { params: { id: string } }) {
 async function EditFormLoader({ id }: { id: string }) {
   // Dữ liệu động được fetch ở đây
   const brand = await fetchBrandsById(id);
+  if (!brand) {
+    notFound();
+  }
   return <Form brand={brand} />;
 }
