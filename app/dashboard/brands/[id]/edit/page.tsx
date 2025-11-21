@@ -4,11 +4,26 @@ import { fetchBrandsById } from '@/app/lib/data';
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
  
-export default function Page(props: { params: { id: string } }) {
-  const id = props.params.id;
-
+export default function Page(props: { params: Promise<{ id: string }> }) {
   return (
     <main>
+      <Suspense fallback={<div>Loading...</div>}>
+        <EditFormLoader params={props.params} />
+      </Suspense>
+    </main>
+  );
+}
+
+async function EditFormLoader({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const brand = await fetchBrandsById(id);
+
+  if (!brand) {
+    notFound();
+  }
+
+  return (
+    <>
       <Breadcrumbs
         breadcrumbs={[
           { label: 'Brands', href: '/dashboard/brands' },
@@ -19,18 +34,7 @@ export default function Page(props: { params: { id: string } }) {
           },
         ]}
       />
-      <Suspense fallback={<div>Loading...</div>}>
-        <EditFormLoader id={id} />
-      </Suspense>
-    </main>
+      <Form brand={brand} />
+    </>
   );
-}
-
-async function EditFormLoader({ id }: { id: string }) {
-  // Dữ liệu động được fetch ở đây
-  const brand = await fetchBrandsById(id);
-  if (!brand) {
-    notFound();
-  }
-  return <Form brand={brand} />;
 }

@@ -1,42 +1,52 @@
 import Form from '@/app/ui/invoices/edit-form';
 import Breadcrumbs from '@/app/ui/invoices/breadcrumbs';
-import { fetchCustomers, fetchOrdersById } from '@/app/lib/data';
-import { Suspense } from 'react';
+import { fetchOrdersById, fetchCustomers } from '@/app/lib/data';
 import { notFound } from 'next/navigation';
- 
-export default async function Page(props: { params: Promise<{ id: string }> }) {
-  const params = await props.params;
-  const id = params.id;
+import { Suspense } from 'react';
 
+// 1. Component "Vỏ" (Shell): Không được await dữ liệu động ở đây
+export default function Page(props: { params: Promise<{ id: string }> }) {
+  // LƯU Ý: KHÔNG 'await props.params' ở đây.
+  // Truyền thẳng Promise xuống component con.
+  
   return (
     <main>
-      <Breadcrumbs
-        breadcrumbs={[
-          { label: 'Invoices', href: '/dashboard/orders' },
-          {
-            label: 'Edit Invoice',
-            href: `/dashboard/orders/${id}/edit`,
-            active: true,
-          },
-        ]}
-      />
-      <Suspense fallback={<div>Loading form...</div> /* Hoặc <EditFormSkeleton /> */}>
-        <EditInvoiceLoader id={id} />
+      {/* 2. Bọc toàn bộ phần nội dung động (bao gồm cả Breadcrumbs và Form) vào Suspense */}
+      <Suspense fallback={<div>Loading editor...</div>}>
+        <EditOrderContent params={props.params} />
       </Suspense>
     </main>
   );
 }
 
-async function EditInvoiceLoader({ id }: { id: string }) {
-  // Dữ liệu động được fetch ở đây
+// 3. Component "Nội dung" (Content): Nơi thực sự xử lý dữ liệu
+async function EditOrderContent({ params }: { params: Promise<{ id: string }> }) {
+  // Bây giờ chúng ta mới await params (An toàn vì đang ở trong Suspense)
+  const { id } = await params;
+
+  // Gọi dữ liệu song song
   const [order, customers] = await Promise.all([
     fetchOrdersById(id),
     fetchCustomers(),
   ]);
 
-  // (Nên thêm: if (!order) { notFound(); } )
   if (!order) {
     notFound();
   }
-  return <Form order={order} customers={customers} />;
+
+  return (
+    <>
+      <Breadcrumbs
+        breadcrumbs={[
+          { label: 'Orders', href: '/dashboard/orders' },
+          {
+            label: 'Edit Order',
+            href: `/dashboard/orders/${id}/edit`,
+            active: true,
+          },
+        ]}
+      />
+      <Form order={order} customers={customers} />
+    </>
+  );
 }

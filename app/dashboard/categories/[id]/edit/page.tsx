@@ -4,11 +4,26 @@ import { fetchCategoriesById } from '@/app/lib/data';
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
  
-export default function Page(props: { params: { id: string } }) {
-  const id = props.params.id;
-
+export default function Page(props: { params: Promise<{ id: string }> }) {
   return (
     <main>
+      <Suspense fallback={<div>Loading...</div>}>
+        <EditFormLoader params={props.params} />
+      </Suspense>
+    </main>
+  );
+}
+
+async function EditFormLoader({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const category = await fetchCategoriesById(id);
+
+  if (!category) {
+    notFound();
+  }
+
+  return (
+    <>
       <Breadcrumbs
         breadcrumbs={[
           { label: 'Categories', href: '/dashboard/categories' },
@@ -19,20 +34,7 @@ export default function Page(props: { params: { id: string } }) {
           },
         ]}
       />
-      <Suspense fallback={<div>Loading...</div>}>
-        <EditFormLoader id={id} />
-      </Suspense>
-    </main>
+      <Form category={category} />
+    </>
   );
-}
-
-async function EditFormLoader({ id }: { id: string }) {
-  // Dữ liệu động được fetch ở đây
-  const category = await fetchCategoriesById(id);
-
-  // (Nên thêm: if (!brand) { notFound(); } )
-  if (!category) {
-    notFound();
-  }
-  return <Form category={category} />
 }

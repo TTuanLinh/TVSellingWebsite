@@ -146,7 +146,6 @@ export async function fetchOrdersPages(query: string) {
 }
 
 export async function fetchCustomers() {
-  "use cache"
   try{
     const data = await prisma.user.findMany({
       where: { role: 0},
@@ -167,7 +166,6 @@ export async function fetchCustomers() {
 }
 
 export async function fetchOrdersById(id: string) {
-  "use cache"
   const numericId = Number(id);
   if (isNaN(numericId)) {
     return null;
