@@ -7,19 +7,11 @@ import { InvoicesTableSkeleton } from '@/app/ui/skeletons';
 import { Suspense } from 'react';
 import { fetchOrdersPages } from '@/app/lib/data';
 
-/**
- * 1. Sửa lại typing của searchParams (không cần Promise)
- * 2. Page KHÔNG còn "async"
- */
-export default function Page({
-  searchParams,
-}: {
-  searchParams?: {
-    query?: string;
-    page?: string;
-  };
+export default async function Page(props:{
+  searchParams?: Promise<{ query?: string; page?: string; }>;
 }) {
-  // 3. Lấy query và page một cách đồng bộ (synchronously)
+  const searchParams = await props.searchParams;
+  
   const query = searchParams?.query || '';
   const currentPage = Number(searchParams?.page) || 1;
 

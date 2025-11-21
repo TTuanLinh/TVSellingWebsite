@@ -4,17 +4,18 @@ import { fetchCustomers, fetchOrdersById } from '@/app/lib/data';
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
  
-export default function Page(props: { params: { id: string } }) {
-  const id = props.params.id;
+export default async function Page(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
+  const id = params.id;
 
   return (
     <main>
       <Breadcrumbs
         breadcrumbs={[
-          { label: 'Invoices', href: '/dashboard/invoices' },
+          { label: 'Invoices', href: '/dashboard/orders' },
           {
             label: 'Edit Invoice',
-            href: `/dashboard/invoices/${id}/edit`,
+            href: `/dashboard/orders/${id}/edit`,
             active: true,
           },
         ]}

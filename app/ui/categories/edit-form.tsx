@@ -1,12 +1,7 @@
 'use client';
 
 import { Category } from '@prisma/client';
-import {
-  CheckIcon,
-  ClockIcon,
-  CurrencyDollarIcon,
-  UserCircleIcon,
-} from '@heroicons/react/24/outline';
+import { UserCircleIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { Button } from '@/app/ui/button';
 import { updateCategory, CategoryState } from '@/app/lib/actions';
