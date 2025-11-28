@@ -22,7 +22,9 @@ export default function Page(props: {
       
       <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
         {/* Search là Client Component nên tự dùng useSearchParams */}
-        <Search placeholder="Search Categories..." />
+        <Suspense fallback={<div>Loading search...</div>}>
+          <Search placeholder="Search Categories..." />
+        </Suspense>
         <CreateCategory />
       </div>
       
