@@ -24,7 +24,9 @@ export default function Page(props: {
       
       <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
         {/* Search là Client Component nên nó tự dùng useSearchParams(), không cần truyền prop */}
-        <Search placeholder="Search Orders..." />
+        <Suspense fallback={<div>Loading search...</div>}>
+          <Search placeholder="Search Orders..." />
+        </Suspense>
         <CreateInvoice />
       </div>
       
