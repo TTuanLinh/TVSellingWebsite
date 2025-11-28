@@ -46,6 +46,7 @@ export const { auth, signIn, signOut } = NextAuth({
               name: user.name,
               image: user.avatar,
               role: user.role,
+              passwordChangedAt: user.passwordChangedAt, 
             };
           }
         }

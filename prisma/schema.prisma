@@ -22,16 +22,19 @@ model Revenue {
 }
 
 model User {
-  id        Int       @id @default(autoincrement())
-  email     String    @unique
-  password  String
-  name      String
-  role      Int       @default(0)
-  avatar    String?
-  phone     String?   
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime? // Hỗ trợ Xóa Mềm
+  id                 Int       @id @default(autoincrement())
+  email              String    @unique
+  password           String
+  name               String
+  role               Int       @default(0)
+  avatar             String?
+  phone              String?   
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  deletedAt          DateTime? // Hỗ trợ Xóa Mềm
+  passwordChangedAt  DateTime @default(now())
+  isTwoFactorEnabled Boolean @default(false) // Đánh dấu đã bật 2FA chưa
+  twoFactorSecret    String?
 
   // Quan hệ
   feedbacks Feedback[]

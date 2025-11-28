@@ -7,6 +7,7 @@ import { redirect } from 'next/navigation';
 import { signIn } from '@/auth';
 import { AuthError } from 'next-auth';
 import bcrypt from 'bcrypt';
+import { auth } from '@/auth';
 
 const registerSchema = z.object({
   email: z.string().email({ 
@@ -43,6 +44,10 @@ const BrandFormSchema = z.object({
   name: z.string().min(1, {
     message: 'Brand name is required.',
   }),
+});
+
+const ChangePassSchema = z.object({
+  newPassword: z.string().min(6),
 });
 
 
@@ -250,6 +255,41 @@ export async function register(
   
   // 8. Đăng ký thành công -> Chuyển hướng đến trang Đăng nhập
   redirect('/login');
+}
+
+export async function changePassword(prevState: any, formData: FormData) {
+  const session = await auth();
+  if (!session?.user?.id) return 'Chưa đăng nhập';
+
+  const parsed = ChangePassSchema.safeParse({
+    newPassword: formData.get('newPassword'),
+  });
+
+  if (!parsed.success) return 'Mật khẩu phải có ít nhất 6 ký tự';
+
+  // Mã hóa mật khẩu mới
+  const hashedPassword = await bcrypt.hash(parsed.data.newPassword, 10);
+
+  try {
+    await prisma.user.update({
+      where: { id: Number(session.user.id) },
+      data: {
+        password: hashedPassword,
+        passwordChangedAt: new Date(),
+      },
+    });
+  } catch (e) {
+    return 'Lỗi cơ sở dữ liệu';
+  }
+
+  await signIn("credentials", {
+    email: session.user.email,
+    password: parsed.data.newPassword,
+    redirect: false,
+  });
+
+  // Đổi xong thì redirect về đúng nơi
+  redirect(session.user.role === 1 ? '/dashboard' : '/userDashboard');
 }
 
 export async function deleteCategory(id: string) {

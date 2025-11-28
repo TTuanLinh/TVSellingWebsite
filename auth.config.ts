@@ -1,16 +1,18 @@
 import type { NextAuthConfig, DefaultSession } from 'next-auth';
 import 'next-auth';
 import 'next-auth/jwt';
-// import { inter } from './app/ui/fonts'; // (Bình luận hoặc xóa dòng này nếu không dùng)
 
 // Khai báo kiểu (type)
 declare module 'next-auth' {
   interface User {
     role?: number | null;
+    passwordChangedAt?: Date | null;
   }
   interface Session {
     user: {
       role?: number | null;
+      passwordChangedAt?: Date | null; // <-- Thêm trường này
+      id: string;
     } & DefaultSession['user'];
   }
 }
@@ -30,6 +32,34 @@ export const authConfig = {
       const isLoggedIn = !!auth?.user;
       const userRole = auth?.user?.role; 
       const { pathname } = nextUrl;
+
+      if (isLoggedIn) {
+        // @ts-ignore: TypeScript có thể chưa nhận diện trường này ngay
+        const passwordChangedAt = auth?.user?.passwordChangedAt
+          ? new Date(auth.user.passwordChangedAt)
+          : new Date();
+        const now = new Date();
+        const diffTime = Math.abs(now.getTime() - passwordChangedAt.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        const isExpired = diffDays > 90;
+        const isOnChangePasswordPage = pathname === '/change-password';
+
+        // Nếu hết hạn VÀ chưa ở trang đổi mật khẩu -> Bắt buộc chuyển hướng
+        if (isExpired && !isOnChangePasswordPage) {
+           return Response.redirect(new URL('/change-password', nextUrl));
+        }
+
+        // Nếu chưa hết hạn mà cố vào trang đổi mật khẩu -> Đá về trang chủ tương ứng
+        if (!isExpired && isOnChangePasswordPage) {
+           const homeUrl = userRole === 1 ? '/dashboard' : '/userDashboard';
+           return Response.redirect(new URL(homeUrl, nextUrl));
+        }
+
+        console.log("passwordChangedAt =", passwordChangedAt);
+        console.log("now =", now);
+        console.log("diffDays =", diffDays);
+      }
 
       // Logic Phân Quyền (Authorization)
       if (pathname.startsWith('/dashboard')) {
@@ -66,25 +96,33 @@ export const authConfig = {
     },
 
     // Logic gắn 'role' vào Token (chạy khi đăng nhập)
-    async jwt({ token, user }) {
-      console.log('JWT callback:', { tokenBefore: token, user }); // Log của bạn
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.role = user.role;
+        token.passwordChangedAt = user.passwordChangedAt
+          ? user.passwordChangedAt.toISOString()
+          : null;
       }
-      console.log('JWT after set:', token); // Log của bạn
+
+      if (trigger === 'update' && session?.passwordChangedAt) {
+        token.passwordChangedAt = session.passwordChangedAt;
+      }
+
       return token;
     },
     
     // Logic gắn 'role' vào Session (chạy khi gọi await auth())
     async session({ session, token }) {
-      console.log('Session callback:', { session, token }); // Log của bạn
       if (session.user) {
-        session.user.id = token.sub || (token.id as string); 
+        session.user.id = token.sub || (token.id as string);
         session.user.role = token.role;
+
+        session.user.passwordChangedAt = token.passwordChangedAt
+          ? new Date(token.passwordChangedAt as string)
+          : null;
       }
-      console.log('Session after set:', session); // Log của bạn
       return session;
-    },
+    }
   },
   providers: [], // Luôn để trống ở file config
 } satisfies NextAuthConfig;
