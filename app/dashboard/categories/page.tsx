@@ -1,59 +1,75 @@
 import Pagination from '@/app/ui/invoices/pagination';
 import Search from '@/app/ui/search';
-import Table from '@/app/ui/categories/table';
-import { CreateCategory } from '@/app/ui/categories/buttons';
+import Table from '@/app/ui/categories/table'; 
+import { CreateCategory } from '@/app/ui/categories/buttons'; 
 import { lusitana } from '@/app/ui/fonts';
-import { InvoicesTableSkeleton } from '@/app/ui/skeletons';
+import { InvoicesTableSkeleton } from '@/app/ui/skeletons'; 
 import { Suspense } from 'react';
 import { fetchCategoriesPages } from '@/app/lib/data';
 
-/**
- * 1. Sửa lại typing của searchParams (không cần Promise)
- * 2. Page KHÔNG còn "async"
- */
-export default function Page({
-  searchParams,
-}: {
-  searchParams?: {
+// 1. Component "Vỏ" (Shell): Chỉ truyền Promise xuống dưới
+export default function Page(props: {
+  searchParams?: Promise<{
     query?: string;
     page?: string;
-  };
+  }>;
 }) {
-  // 3. Lấy query và page một cách đồng bộ (synchronously)
-  const query = searchParams?.query || '';
-  const currentPage = Number(searchParams?.page) || 1;
-
   return (
     <div className="w-full">
       <div className="flex w-full items-center justify-between">
         <h1 className={`${lusitana.className} text-2xl`}>Categories</h1>
       </div>
+      
       <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
-        <Suspense fallback={<div>Loading Search...</div>}>
-          <Search placeholder="Search Categories..." />
-        </Suspense>
+        {/* Search là Client Component nên tự dùng useSearchParams */}
+        <Search placeholder="Search Categories..." />
         <CreateCategory />
       </div>
       
-      {/* Suspense cho Table (Giữ nguyên, đã đúng) */}
-      <Suspense key={query + currentPage} fallback={<InvoicesTableSkeleton />}>
-        <Table query={query} currentPage={currentPage} />
+      {/* 2. Suspense cho Table (Wrapper) */}
+      <Suspense fallback={<InvoicesTableSkeleton />}>
+        <CategoriesTableWrapper searchParams={props.searchParams} />
       </Suspense>
       
-      {/* 4. Thêm Suspense cho Pagination */}
+      {/* 3. Suspense cho Pagination (Wrapper) */}
       <div className="mt-5 flex w-full justify-center">
         <Suspense fallback={<div>Loading pagination...</div>}>
-          <PaginationWrapper query={query} />
+          <PaginationWrapper searchParams={props.searchParams} />
         </Suspense>
       </div>
     </div>
   );
 }
 
-/**
- * 5. Tạo component con "async" để fetch totalPages
- */
-async function PaginationWrapper({ query }: { query: string }) {
+// --- CÁC COMPONENT CON (Nơi thực sự lấy dữ liệu) ---
+
+// Wrapper cho Table
+async function CategoriesTableWrapper({
+  searchParams,
+}: {
+  searchParams?: Promise<{ query?: string; page?: string }>;
+}) {
+  // Await dữ liệu động Ở ĐÂY (bên trong Suspense)
+  const params = await searchParams;
+  const query = params?.query || '';
+  const currentPage = Number(params?.page) || 1;
+
+  // Truyền dữ liệu xuống Table
+  return <Table query={query} currentPage={currentPage} />;
+}
+
+// Wrapper cho Pagination
+async function PaginationWrapper({
+  searchParams,
+}: {
+  searchParams?: Promise<{ query?: string; page?: string }>;
+}) {
+  // Await dữ liệu động Ở ĐÂY (bên trong Suspense)
+  const params = await searchParams;
+  const query = params?.query || '';
+
+  // Fetch tổng số trang category
   const totalPages = await fetchCategoriesPages(query);
+
   return <Pagination totalPages={totalPages} />;
 }
