@@ -12,6 +12,7 @@ import { useActionState } from 'react';
 import { authenticate } from '@/app/lib/actions';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { Turnstile } from '@marsidev/react-turnstile';
 
 export default function LoginForm() {
   const searchParams = useSearchParams();
@@ -68,6 +69,9 @@ export default function LoginForm() {
           </div>
         </div>
         <input type="hidden" name="callbackUrl" value={callbackUrl} />
+        <div className="mt-4 flex justify-center">
+            <Turnstile siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY as string} />
+        </div>
         <Button className="mt-4 w-full" aria-disabled={isPending} type="submit">
           Log in <ArrowRightIcon className="ml-auto h-5 w-5 text-gray-50" />
         </Button>

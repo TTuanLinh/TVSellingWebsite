@@ -12,6 +12,7 @@ import { useState, useActionState } from 'react';
 import { register } from '@/app/lib/actions';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { Turnstile } from '@marsidev/react-turnstile';
 
 export default function RegisterForm() {
   const searchParams = useSearchParams();
@@ -116,6 +117,9 @@ export default function RegisterForm() {
             </Link>
           </label>
         </div>
+        <div className="mt-4 flex justify-center">
+          <Turnstile siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY as string} />
+       </div>
         <Button className="mt-4 w-full" aria-disabled={isPending || !isTermsChecked} disabled={isPending || !isTermsChecked} type="submit">
           Sign up <ArrowRightIcon className="ml-auto h-5 w-5 text-gray-50" />
         </Button>
