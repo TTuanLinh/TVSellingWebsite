@@ -12,56 +12,21 @@ import { useActionState } from 'react';
 import { authenticate } from '@/app/lib/actions';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import dynamic from 'next/dynamic';
-import { useRef } from 'react';
-
-// Turnstile dynamic (bắt buộc để dùng invisible mode)
-const Turnstile = dynamic(
-  () => import('@marsidev/react-turnstile').then((m) => m.Turnstile),
-  { ssr: false }
-);
+import { Turnstile } from '@marsidev/react-turnstile';
 
 export default function LoginForm() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
-
-  const formRef = useRef<HTMLFormElement>(null);
-  const turnstileRef = useRef<any>(null);
-
   const [errorMessage, formAction, isPending] = useActionState(
     authenticate,
     undefined,
   );
-
-  // Khi user bấm submit
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault(); // chặn submit
-
-    // chạy Turnstile invisible
-    turnstileRef.current?.execute();
-  };
-
-  // Khi Turnstile pass → chạy submit thật
-  const handleSuccess = (token: string) => {
-    console.log('Turnstile token:', token);
-
-    // Tạo input ẩn để gửi token vào server
-    const input = document.createElement("input");
-    input.type = "hidden";
-    input.name = "cf-turnstile-response";
-    input.value = token;
-    formRef.current?.appendChild(input);
-
-    formRef.current?.submit();
-  };
-
   return (
-    <form ref={formRef} action={formAction} onSubmit={handleSubmit} className="space-y-3">
+    <form action={formAction} className="space-y-3">
       <div className="flex-1 rounded-lg bg-gray-50 px-6 pb-4 pt-8">
         <h1 className={`${lusitana.className} mb-3 text-2xl`}>
           Please log in to continue.
         </h1>
-
         <div className="w-full">
           <div>
             <label
@@ -82,7 +47,6 @@ export default function LoginForm() {
               <AtSymbolIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
             </div>
           </div>
-
           <div className="mt-4">
             <label
               className="mb-3 mt-5 block text-xs font-medium text-gray-900"
@@ -104,13 +68,12 @@ export default function LoginForm() {
             </div>
           </div>
         </div>
-
         <input type="hidden" name="callbackUrl" value={callbackUrl} />
         <Button className="mt-4 w-full" aria-disabled={isPending} type="submit">
           Log in <ArrowRightIcon className="ml-auto h-5 w-5 text-gray-50" />
         </Button>
-
         <div className="flex h-8 items-end space-x-1" aria-live="polite" aria-atomic="true">
+          {/* Add form errors here */}
           {errorMessage && (
             <>
               <ExclamationCircleIcon className="h-5 w-5 text-red-500" />
@@ -118,7 +81,6 @@ export default function LoginForm() {
             </>
           )}
         </div>
-
         <div className="mt-4 text-center text-sm">
           <span className="text-gray-600">Don't have an account?</span>{' '}
           <Link
