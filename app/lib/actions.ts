@@ -200,24 +200,7 @@ export async function authenticate(
   formData: FormData,
 ) {
   try {
-    // 1. Lấy token từ form (Cloudflare Turnstile tự động thêm input này)
-    const token = formData.get('cf-turnstile-response') as string;
-    
-    // 2. Kiểm tra Token với Cloudflare (Server-side validation)
-    // Nếu không có token (chưa tick vào widget) hoặc token giả mạo -> Chặn luôn
-    if (!token) {
-      return 'Vui lòng xác thực bạn không phải là robot.';
-    }
-    
-    const isHuman = await verifyTurnstileToken(token);
-    
-    if (!isHuman) {
-      return 'Xác thực robot thất bại. Vui lòng thử lại.';
-    }
-
-    // 3. Nếu là người thật, mới cho phép tiếp tục đăng nhập
     await signIn('credentials', formData);
-    
   } catch (error) {
     if (error instanceof AuthError) {
       switch (error.type) {
