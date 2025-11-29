@@ -222,7 +222,7 @@ export async function register(
   const validatedFields = registerSchema.safeParse(rawFormData);
 
   if (!validatedFields.success) {
-    return 'Invalid data. Please check your fields.'; // Trả về 'string' lỗi
+    return validatedFields.error.errors[0].message; // Trả về 'string' lỗi
   }
 
   const { email, password, repassword } = validatedFields.data;
