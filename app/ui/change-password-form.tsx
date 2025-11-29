@@ -6,6 +6,9 @@ import { Button } from '@/app/ui/button';
 import { useActionState } from 'react';
 import { changePassword } from '@/app/lib/actions';
 
+const PASSWORD_PATTERN = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[\\W_]).{12,}$";
+const PASSWORD_TITLE = "Mật khẩu phải có ít nhất 12 ký tự, bao gồm: chữ hoa, chữ thường, số và ký tự đặc biệt.";
+
 // Thêm prop 'isExpired' để biết là bắt buộc hay tự nguyện
 export default function ChangePasswordForm({ isExpired = false }: { isExpired?: boolean }) {
   const [errorMessage, formAction, isPending] = useActionState(changePassword, undefined);
@@ -39,7 +42,9 @@ export default function ChangePasswordForm({ isExpired = false }: { isExpired?: 
                 name="newPassword"
                 placeholder="Nhập mật khẩu mới"
                 required
-                minLength={6}
+                minLength={12}
+                pattern={PASSWORD_PATTERN}
+                title={PASSWORD_TITLE}
               />
               <KeyIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
             </div>
@@ -56,7 +61,9 @@ export default function ChangePasswordForm({ isExpired = false }: { isExpired?: 
                 name="confirmPassword"
                 placeholder="Nhập lại mật khẩu mới"
                 required
-                minLength={6}
+                minLength={12}
+                pattern={PASSWORD_PATTERN}
+                title={PASSWORD_TITLE}
               />
               <KeyIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
             </div>

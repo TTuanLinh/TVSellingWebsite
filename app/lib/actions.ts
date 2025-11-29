@@ -13,7 +13,13 @@ const registerSchema = z.object({
   email: z.string().email({ 
     message: 'Please enter a valid email address.' 
   }),
-  password: z.string(),
+  password: z
+    .string()
+    .min(12, { message: 'Mật khẩu phải có ít nhất 12 ký tự.' })
+    .regex(/[a-z]/, { message: 'Mật khẩu phải chứa ít nhất một chữ thường.' })
+    .regex(/[A-Z]/, { message: 'Mật khẩu phải chứa ít nhất một chữ hoa.' })
+    .regex(/[0-9]/, { message: 'Mật khẩu phải chứa ít nhất một số.' })
+    .regex(/[\W_]/, { message: 'Mật khẩu phải chứa ít nhất một ký tự đặc biệt.' }),
   repassword: z.string()
 });
 
