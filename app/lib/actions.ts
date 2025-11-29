@@ -8,6 +8,7 @@ import { signIn } from '@/auth';
 import { AuthError } from 'next-auth';
 import bcrypt from 'bcrypt';
 import { auth } from '@/auth';
+import { verifyTurnstileToken } from './turnstile';
 
 const registerSchema = z.object({
   email: z.string().email({ 
@@ -199,7 +200,24 @@ export async function authenticate(
   formData: FormData,
 ) {
   try {
+    // 1. Lấy token từ form (Cloudflare Turnstile tự động thêm input này)
+    const token = formData.get('cf-turnstile-response') as string;
+    
+    // 2. Kiểm tra Token với Cloudflare (Server-side validation)
+    // Nếu không có token (chưa tick vào widget) hoặc token giả mạo -> Chặn luôn
+    if (!token) {
+      return 'Vui lòng xác thực bạn không phải là robot.';
+    }
+    
+    const isHuman = await verifyTurnstileToken(token);
+    
+    if (!isHuman) {
+      return 'Xác thực robot thất bại. Vui lòng thử lại.';
+    }
+
+    // 3. Nếu là người thật, mới cho phép tiếp tục đăng nhập
     await signIn('credentials', formData);
+    
   } catch (error) {
     if (error instanceof AuthError) {
       switch (error.type) {
@@ -496,24 +514,3 @@ export async function updateBrand(
   redirect('/dashboard/brands');
 }
 
-const verifyEndpoint = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
-
-export async function verifyTurnstileToken(token: string) {
-  const secret = process.env.TURNSTILE_SECRET_KEY;
-
-  if (!secret) {
-    throw new Error('TURNSTILE_SECRET_KEY is not defined');
-  }
-
-  const res = await fetch(verifyEndpoint, {
-    method: 'POST',
-    body: `secret=${encodeURIComponent(secret)}&response=${encodeURIComponent(token)}`,
-    headers: {
-      'content-type': 'application/x-www-form-urlencoded',
-    },
-  });
-
-  const data = await res.json();
-
-  return data.success;
-}
