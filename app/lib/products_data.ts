@@ -101,9 +101,20 @@ export async function fetchBrands() {
   }
 }
 
-export async function fetchProducts() {
+export async function fetchProducts(query: string = '') {
   try {
+    // Nếu có query thì lọc, không thì lấy hết
     const products = await prisma.product.findMany({
+      where: {
+        OR: [
+          {
+            name: {
+              contains: query,
+              mode: 'insensitive', 
+            },
+          },
+        ],
+      },
       orderBy: {
         createdAt: 'desc',
       },
