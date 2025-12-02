@@ -9,22 +9,20 @@ const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
 };
 
-// Trong Next.js 15, searchParams là một Promise
-export default async function Page(props: {
+// Next.js 15: searchParams là Promise. 
+// QUAN TRỌNG: Không await searchParams ở đây để tránh chặn render (blocking).
+export default function Page(props: {
   searchParams?: Promise<{
     query?: string;
     page?: string;
   }>;
 }) {
-  const searchParams = await props.searchParams;
-  const query = searchParams?.query || '';
-
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen bg-gray-50">
       <h1 className="text-2xl font-bold mb-6 text-gray-900">Sản phẩm mới nhất</h1>
       
       <div className="mt-4 flex items-center justify-between gap-2 md:mt-8 mb-8">
-        {/* Search Component */}
+        {/* Search Component (Client Component) tự xử lý logic của nó */}
         <div className="w-full sm:w-1/3">
           <Suspense fallback={<div className="h-10 w-full bg-gray-200 rounded animate-pulse"></div>}>
             <Search placeholder="Tìm kiếm sản phẩm..." />
@@ -32,20 +30,26 @@ export default async function Page(props: {
         </div>
       </div>
       
-      {/* Bọc danh sách sản phẩm trong Suspense. 
-         Next.js sẽ render khung trang trước, sau đó stream dữ liệu sản phẩm vào sau.
-         Giúp trang load ngay lập tức mà không bị chặn (blocking).
-      */}
+      {/* Truyền Promise searchParams xuống component con.
+          Component con sẽ await nó bên trong Suspense. */}
       <Suspense fallback={<ProductsLoading />}>
-        <ProductList query={query} />
+        <ProductList searchParamsPromise={props.searchParams} />
       </Suspense>
     </main>
   );
 }
 
-// Component con: Chịu trách nhiệm fetch dữ liệu
-async function ProductList({ query }: { query: string }) {
-  // Fetch data bên trong component con
+// Component con: Nhận Promise, await nó, sau đó fetch dữ liệu
+async function ProductList({ 
+  searchParamsPromise 
+}: { 
+  searchParamsPromise?: Promise<{ query?: string }> 
+}) {
+  // Await searchParams BÊN TRONG component con (nơi đã được bọc Suspense)
+  const params = await searchParamsPromise;
+  const query = params?.query || '';
+  
+  // Fetch data
   const products = await fetchProducts(query);
 
   if (products.length === 0) {
@@ -61,14 +65,13 @@ async function ProductList({ query }: { query: string }) {
       {products.map((product) => (
         <div key={product.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col hover:shadow-md transition-all duration-300 group">
           
-          {/* Ảnh sản phẩm */}
           <div className="relative aspect-square bg-gray-100 overflow-hidden">
-             {/* Nhớ config domain ảnh trong next.config.js nếu dùng ảnh ngoài */}
             <Image 
               src={product.image || '/placeholder.png'} 
               alt={product.name}
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-300"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           </div>
 
@@ -84,7 +87,6 @@ async function ProductList({ query }: { query: string }) {
               <span className="font-bold text-blue-600 text-lg">
                 {formatCurrency(product.price)}
               </span>
-              {/* Client Component Button */}
               <AddToCartButton productId={product.id} />
             </div>
           </div>
@@ -94,7 +96,7 @@ async function ProductList({ query }: { query: string }) {
   );
 }
 
-// Component Skeleton Loading cho danh sách sản phẩm
+// Component Skeleton Loading
 function ProductsLoading() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 animate-pulse">
