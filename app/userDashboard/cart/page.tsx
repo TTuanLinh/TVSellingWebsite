@@ -46,7 +46,7 @@ async function CartDetails() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
         <p className="text-xl text-gray-500">Giỏ hàng của bạn đang trống</p>
-        <a href="/dashboard" className="text-blue-600 hover:underline">
+        <a href="/userDashboard" className="text-blue-600 hover:underline">
           Quay lại mua sắm
         </a>
       </div>

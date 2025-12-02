@@ -1,41 +1,39 @@
 import prisma from '@/app/lib/prisma';
 import { auth } from '@/auth';
-import { confirmPayment } from '@/app/lib/confirmPayment';
+import { confirmPayment } from '@/app/lib/confirmPayment'; // Đảm bảo đường dẫn đúng với dự án của bạn
 import { redirect, notFound } from 'next/navigation';
 import Image from 'next/image';
-import { CheckCircle, ArrowLeft, Copy } from 'lucide-react';
+import { CheckCircle, ArrowLeft } from 'lucide-react';
 import { Suspense } from 'react';
 
-// Component chính: Chỉ render khung và Suspense
-export default async function PaymentPage({ params }: { params: Promise<{ id: string }> }) {
-  // await params ở đây vẫn ổn trong hầu hết trường hợp của Next.js 15, 
-  // nhưng nếu vẫn lỗi strict, có thể cần chuyển xuống dưới. 
-  // Tuy nhiên auth() mới là nguyên nhân chính gây lỗi blocking.
-  const { id } = await params;
-
+// 1. Component Chính (Shell): KHÔNG await params ở đây
+export default function PaymentPage({ params }: { params: Promise<{ id: string }> }) {
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
-        {/* Nút quay lại */}
         <a href="/userDashboard/orders" className="flex items-center text-gray-600 hover:text-gray-900 mb-6 w-fit">
           <ArrowLeft className="w-4 h-4 mr-2" />
           Quay lại đơn hàng
         </a>
 
+        {/* Truyền Promise xuống cho component con xử lý */}
         <Suspense fallback={<PaymentLoading />}>
-          <PaymentDetails orderIdStr={id} />
+          <PaymentDetails paramsPromise={params} />
         </Suspense>
       </div>
     </div>
   );
 }
 
-// Component con: Xử lý dữ liệu nặng (Auth, DB)
-async function PaymentDetails({ orderIdStr }: { orderIdStr: string }) {
+// 2. Component Con: Await params và xử lý logic nặng
+async function PaymentDetails({ paramsPromise }: { paramsPromise: Promise<{ id: string }> }) {
+  // Await params BÊN TRONG Suspense boundary
+  const { id } = await paramsPromise;
+  
   const session = await auth();
   if (!session?.user) redirect('/login');
 
-  const orderId = Number(orderIdStr);
+  const orderId = Number(id);
   const userId = Number(session.user.id);
 
   // Lấy thông tin đơn hàng
@@ -167,7 +165,7 @@ async function PaymentDetails({ orderIdStr }: { orderIdStr: string }) {
   );
 }
 
-// Component Loading đơn giản
+// 3. Component Loading
 function PaymentLoading() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-pulse">
