@@ -119,7 +119,7 @@ export default function RegisterForm() {
         </div>
         <div className="mt-4 flex justify-center">
           <Turnstile siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY as string} />
-       </div>
+        </div>
         <Button className="mt-4 w-full" aria-disabled={isPending || !isTermsChecked} disabled={isPending || !isTermsChecked} type="submit">
           Sign up <ArrowRightIcon className="ml-auto h-5 w-5 text-gray-50" />
         </Button>

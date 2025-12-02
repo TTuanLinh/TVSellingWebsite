@@ -17,6 +17,7 @@
     "bcrypt": "^5.1.1",
     "cloudinary": "^2.8.0",
     "clsx": "^2.1.1",
+    "lucide-react": "^0.555.0",
     "next": "16.0.1",
     "next-auth": "5.0.0-beta.30",
     "next-cloudinary": "^6.17.5",

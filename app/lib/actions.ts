@@ -8,7 +8,6 @@ import { signIn } from '@/auth';
 import { AuthError } from 'next-auth';
 import bcrypt from 'bcrypt';
 import { auth } from '@/auth';
-import { verifyTurnstileToken } from './turnstile';
 
 const registerSchema = z.object({
   email: z.string().email({ 
